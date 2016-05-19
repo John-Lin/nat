@@ -14,6 +14,8 @@ $ ryu-manager l2switch.py dhcp.py snat.py --verbose
 
 # Northbound API
 
+Ryu web server is running on http://localhost:8080/
+
 ## Initialize
 
 `HTTP Request`
@@ -21,7 +23,7 @@ $ ryu-manager l2switch.py dhcp.py snat.py --verbose
 `POST /api/nat_config_init`
 
 
-### This will initialize NAT configuration
+##### This will initialize NAT configuration
 
 Note: Please modify default settings in `nat_config_init` method to fit your requirements
 
@@ -41,7 +43,7 @@ Response `200`
 
 `POST /api/nat_config_init`
 
-## This will update NAT configuration
+##### This will update NAT configuration
 
 Request
 
@@ -57,3 +59,7 @@ PUT /api/nat_config_save
 ```
 
 Response `200`
+
+# License
+
+MIT © [Che-Wei Lin](https://github.com/John-Lin)
