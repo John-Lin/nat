@@ -29,10 +29,11 @@ Request
 
 ```
 POST /api/nat_config_init HTTP/1.1
+
 {}
 ```
 
-Response 200
+Response `200`
 
 ## Update
 
@@ -51,8 +52,8 @@ PUT /api/nat_config_save
   "wanPort": 1,
   "publicIP": "140.114.xxx.xxx",
   "defultGateway": "140.114.xxx.254",
-  "natPrivateNetwork": "192.168.2.0",
+  "natPrivateNetwork": "192.168.2.0"
 }
 ```
 
-Response 200
+Response `200`
