@@ -7,7 +7,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
 
-from config import settings
+from models import settings
 
 
 class L2Switch(app_manager.RyuApp):
@@ -51,7 +51,10 @@ class L2Switch(app_manager.RyuApp):
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
 
-        if in_port == settings.wan_port:
+        nat_settings = settings.load()
+        wan_port = nat_settings['wan_port']
+
+        if in_port == wan_port:
             # self.logger.info("ignore packet coming from WAN port 3")
             # ignore packet coming from WAN port
             return
