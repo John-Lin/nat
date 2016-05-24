@@ -20,7 +20,7 @@ from netaddr import IPNetwork, IPAddress
 import pprint
 
 from models import settings
-from pkt_utils import arp_pkt_gen
+from helper import nat_helper
 from route import urls
 
 IP_TO_MAC_TABLE = {}
@@ -131,18 +131,18 @@ class SNAT(app_manager.RyuApp):
             # Who has 192.168.8.1 ?
             # Tell 192.168.8.20(Host),
             # 192.168.8.1's fake MAC address (eth1)
-            data = arp_pkt_gen.arp_reply(src_mac=self.MAC_ON_LAN,
-                                         src_ip=str(self.nat_private_ip),
-                                         target_mac=pkt_arp.src_mac,
-                                         target_ip=pkt_arp.src_ip)
+            data = nat_helper.arp_reply(src_mac=self.MAC_ON_LAN,
+                                        src_ip=str(self.nat_private_ip),
+                                        target_mac=pkt_arp.src_mac,
+                                        target_ip=pkt_arp.src_ip)
 
         elif pkt_arp.dst_ip == self.nat_public_ip:
             # Who has 140.114.71.176 ?
             # Tell 140.114.71.xxx(Extranet Network host)
-            data = arp_pkt_gen.arp_reply(src_mac=self.MAC_ON_WAN,
-                                         src_ip=self.nat_public_ip,
-                                         target_mac=pkt_arp.src_mac,
-                                         target_ip=pkt_arp.src_ip)
+            data = nat_helper.arp_reply(src_mac=self.MAC_ON_WAN,
+                                        src_ip=self.nat_public_ip,
+                                        target_mac=pkt_arp.src_mac,
+                                        target_ip=pkt_arp.src_ip)
 
         return data
 
@@ -329,9 +329,9 @@ class SNAT(app_manager.RyuApp):
                     return
 
                 # Sending ARP request to Gateway
-                arp_req_pkt = arp_pkt_gen.broadcast_arp_request(src_mac=self.MAC_ON_WAN,
-                                                                src_ip=self.nat_public_ip,
-                                                                target_ip=target_ip)
+                arp_req_pkt = nat_helper.broadcast_arp_request(src_mac=self.MAC_ON_WAN,
+                                                               src_ip=self.nat_public_ip,
+                                                               target_ip=target_ip)
                 self._send_packet_to_port(datapath, self.wan_port, arp_req_pkt)
 
                 if pkt_tcp:
