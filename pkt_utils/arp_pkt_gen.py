@@ -7,6 +7,7 @@ from ryu.ofproto import ether
 BROADCAST = 'ff:ff:ff:ff:ff:ff'
 TARGET_MAC_ADDRESS = '00:00:00:00:00:00'
 
+
 def arp_reply(src_mac, src_ip, target_mac, target_ip):
     # Creat an empty Packet instance
     pkt = packet.Packet()
@@ -26,6 +27,7 @@ def arp_reply(src_mac, src_ip, target_mac, target_ip):
     data = pkt.data
     # print 'Built up a arp reply packet:', data
     return data
+
 
 def broadcast_arp_request(src_mac, src_ip, target_ip):
     pkt = packet.Packet()
