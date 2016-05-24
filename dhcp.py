@@ -87,9 +87,13 @@ class SimpleDHCPServer(app_manager.RyuApp):
                 pass
 
     def handle_dhcp_discover(self, dhcp_pkt, datapath, port):
-        # Choose a IP form IP pool list
-        client_ip_addr = str(self.ip_pool_list.pop())
-        self.mac_to_client_ip[dhcp_pkt.chaddr] = client_ip_addr
+        try:
+            # Choose a IP form IP pool list
+            client_ip_addr = str(self.ip_pool_list.pop())
+            self.mac_to_client_ip[dhcp_pkt.chaddr] = client_ip_addr
+        except IndexError:
+            self.logger.info("EMPTY IP POOL")
+            return
 
         # send dhcp_offer message.
         dhcp_offer_msg_type = '\x02'
