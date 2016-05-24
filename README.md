@@ -9,7 +9,7 @@ NOTE: DHCP server application is not working on Windows clients. Linux clients a
 Source NAT use `port 1` as WAN port by default.
 
 ```bash
-$ ryu-manager l2switch.py dhcp.py snat.py --verbose
+$ ryu-manager base.py l2switch.py dhcp.py snat.py --verbose
 ```
 
 # Northbound API
