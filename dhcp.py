@@ -1,16 +1,13 @@
 """
  Simple DHCP Server
 """
-# import logging
 
-from ryu.ofproto import ether
-from ryu.ofproto import inet
 from ryu.ofproto import ofproto_v1_3
 from ryu.base import app_manager
 from ryu.lib.packet import dhcp, udp, ipv4, ethernet
 from ryu.controller.handler import set_ev_cls
 from ryu.controller import ofp_event
-from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
+from ryu.controller.handler import MAIN_DISPATCHER
 from ryu.lib.packet import packet
 from ryu.lib import addrconv
 
@@ -58,30 +55,6 @@ class SimpleDHCPServer(app_manager.RyuApp):
         self.ip_pool_list.remove(self.gw_addr)
         self.ip_pool_list.remove(self.broadcast_addr)
         self.ip_pool_list.remove(self.ip_network[0])
-
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
-        datapath = ev.msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        # install table-miss flow entry
-        #
-        # We specify NO BUFFER to max_len of the output action due to
-        # OVS bug. At this moment, if we specify a lesser number, e.g.,
-        # 128, OVS will send Packet-In with invalid buffer_id and
-        # truncated packet data. In that case, we cannot output packets
-        # correctly.  The bug has been fixed in OVS v2.1.0.
-        match = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
-                                          ofproto.OFPCML_NO_BUFFER)]
-        self.add_flow(datapath, 0, match, actions)
-
-        # install DHCP request packets flow entry
-        match_dhcp_request = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP,
-                                             ip_proto=inet.IPPROTO_UDP,
-                                             udp_src=68, udp_dst=67)
-        self.add_flow(datapath, 100, match_dhcp_request, actions)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto
