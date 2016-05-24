@@ -11,7 +11,7 @@ from ryu.controller.handler import MAIN_DISPATCHER
 from ryu.lib.packet import packet
 from ryu.lib import addrconv
 
-# from config import settings
+from helper import ofp_helper
 from models import settings
 
 
@@ -158,19 +158,4 @@ class SimpleDHCPServer(app_manager.RyuApp):
         pkt.add_protocol(udp.udp(src_port=67, dst_port=68))
         pkt.add_protocol(dhcp_pkt)
 
-        self._send_packet(datapath, pkt, port)
-
-    def _send_packet(self, datapath, pkt, port):
-
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        pkt.serialize()
-        # self.logger.info("packet-out %s" % (pkt,))
-        data = pkt.data
-        actions = [parser.OFPActionOutput(port=port)]
-        out = parser.OFPPacketOut(datapath=datapath,
-                                  buffer_id=ofproto.OFP_NO_BUFFER,
-                                  in_port=ofproto.OFPP_CONTROLLER,
-                                  actions=actions,
-                                  data=data)
-        datapath.send_msg(out)
+        ofp_helper.send_packet(datapath, pkt, port)
