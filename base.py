@@ -7,6 +7,8 @@ from ryu.ofproto import ofproto_v1_3
 from ryu.ofproto import ether
 from ryu.ofproto import inet
 
+from helper import ofp_helper
+
 
 class Base(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -66,13 +68,13 @@ class Base(app_manager.RyuApp):
         self.send_get_config_request(datapath)
 
         # install table-miss flow entry
-        self.add_flow(datapath, 0, match, actions)
+        ofp_helper.add_flow(datapath, 0, match, actions)
 
         # install DHCP request packets flow entry
         match_dhcp_request = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP,
                                              ip_proto=inet.IPPROTO_UDP,
                                              udp_src=68, udp_dst=67)
-        self.add_flow(datapath, 100, match_dhcp_request, actions)
+        ofp_helper.add_flow(datapath, 100, match_dhcp_request, actions)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
