@@ -101,8 +101,9 @@ class SNAT(app_manager.RyuApp):
         datapath.send_msg(mod)
 
     def _send_packet_to_port(self, datapath, port, data):
-        # if not data:
-        #     return
+        if data is None:
+            # Do NOT sent when data is None
+            return
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         actions = [parser.OFPActionOutput(port=port)]
