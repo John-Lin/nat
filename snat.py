@@ -51,7 +51,7 @@ class SNAT(app_manager.RyuApp):
 
         self.MAC_ON_WAN = nat_settings['MAC_ON_WAN']
         self.MAC_ON_LAN = nat_settings['MAC_ON_LAN']
-        self.IDLE_TIME = 100
+        self.IDLE_TIME = 10
 
         self.port_counter = -1
         self.ports_pool = range(2000, 65536)
@@ -62,21 +62,31 @@ class SNAT(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPFlowRemoved, MAIN_DISPATCHER)
     def flow_removed_handler(self, ev):
         """Flow-Removed message. When switch send flow-Removed message to controller,
-        controller will remove tcp/udp port which is not in use."""
-        print 'Flow-Removed event!'
+        controller will remove tcp/udp port from cache which is not in use."""
+        # print 'Flow-Removed event!'
         msg = ev.msg
+        # print msg
 
         tcp_port = msg.match.get('tcp_dst')
         udp_port = msg.match.get('udp_dst')
 
+        if tcp_port not in range(2000, 65536) and tcp_port is not None:
+            print 'TCP port %d not in range(2000, 65536)' % (tcp_port)
+            return
+        if udp_port not in range(2000, 65536) and udp_port is not None:
+            print 'UDP port %d not in range(2000, 65536)' % (udp_port)
+            return
+
         if tcp_port:
-            print '[*] Available TCP port %d' % tcp_port
-            self.ports_pool.append(tcp_port)
-            self.ports_pool.sort()
+            if tcp_port not in self.ports_pool:
+                print '[*] Available TCP port %d' % tcp_port
+                self.ports_pool.append(tcp_port)
+                self.ports_pool.sort()
         elif udp_port:
-            print '[*] Available UDP port %d' % udp_port
-            self.ports_pool.append(udp_port)
-            self.ports_pool.sort()
+            if udp_port not in self.ports_pool:
+                print '[*] Available UDP port %d' % udp_port
+                self.ports_pool.append(udp_port)
+                self.ports_pool.sort()
 
     def add_flow(self, datapath, priority, match, actions, idle_timeout,
                  buffer_id=None):
@@ -90,12 +100,14 @@ class SNAT(app_manager.RyuApp):
                                     idle_timeout=idle_timeout,
                                     buffer_id=buffer_id,
                                     priority=priority,
+                                    flags=ofproto.OFPFF_SEND_FLOW_REM,
                                     match=match,
                                     instructions=inst)
         else:
             mod = parser.OFPFlowMod(datapath=datapath,
                                     idle_timeout=idle_timeout,
                                     priority=priority,
+                                    flags=ofproto.OFPFF_SEND_FLOW_REM,
                                     match=match,
                                     instructions=inst)
         datapath.send_msg(mod)
@@ -189,7 +201,7 @@ class SNAT(app_manager.RyuApp):
         parser = datapath.ofproto_parser
         ofproto = datapath.ofproto
 
-        eth_dst = pkt_ethernet.dst
+        # eth_dst = pkt_ethernet.dst
         eth_src = pkt_ethernet.src
         ipv4_src = pkt_ip.src
         ipv4_dst = pkt_ip.dst
@@ -281,8 +293,8 @@ class SNAT(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         datapath = msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
+        # ofproto = datapath.ofproto
+        # parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
         pkt = packet.Packet(msg.data)
 
